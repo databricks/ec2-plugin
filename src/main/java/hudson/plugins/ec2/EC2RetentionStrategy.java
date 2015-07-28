@@ -27,6 +27,7 @@ import hudson.model.Descriptor;
 import hudson.slaves.RetentionStrategy;
 import hudson.util.TimeUnit2;
 
+import java.lang.NullPointerException;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
@@ -106,6 +107,9 @@ public class EC2RetentionStrategy extends RetentionStrategy<EC2Computer> {
                     // We'll just retry next time we test for idleness.
                     LOGGER.fine("Interrupted while checking host uptime for " + c.getName() + ", will retry next check. Interrupted by: " + e);
 					return 1;
+                } catch (NullPointerException e) {
+                    LOGGER.fine("NPE while checking host uptime for " + c.getName() + ", will retry next check. " + e);
+                    return 1;
                 }
                 final int freeSecondsLeft = (60*60) - (int)(TimeUnit2.SECONDS.convert(uptime, TimeUnit2.MILLISECONDS) % (60*60));
                 // if we have less "free" (aka already paid for) time left than our idle time, stop/terminate the instance
